@@ -1,0 +1,108 @@
+version: '3.8'
+
+x-airflow-common: &airflow-common
+  image: apache/airflow:2.8.1
+  env_file:
+    - .env
+  volumes:
+    - ./dags:/opt/airflow/dags
+    - airflow-logs:/opt/airflow/logs
+    - airflow-plugins:/opt/airflow/plugins
+  depends_on:
+    - postgres
+
+services:
+  jumper:
+    image: kasmweb/chrome:1.14.0
+    container_name: secure_jumper
+    ports:
+      - "6901:6901"
+    shm_size: '512m'
+    environment:
+      # VNC password. Change this in a real environment.
+      - VNC_PW=password
+      # The URL to launch automatically
+      - LAUNCH_URL=http://airflow-webserver:8080/
+      # --- Security Hardening ---
+      # Disable clipboard sharing
+      - KASM_VNC_OPTIONS=-noremoteclipboard
+      # Disable file uploads
+      - KASM_FILE_UPLOADS_DISABLED=true
+      # Disable file downloads
+      - KASM_FILE_DOWNLOADS_DISABLED=true
+      # Disable printing
+      - KASM_PRINTING_DISABLED=true
+      # Disable microphone access
+      - KASM_MICROPHONE_DISABLED=true
+      # Disable webcam access
+      - KASM_WEBCAM_DISABLED=true
+    depends_on:
+      airflow-webserver:
+        condition: service_healthy
+
+  postgres:
+    image: postgres:13
+    container_name: postgres
+    environment:
+      - POSTGRES_USER=airflow
+      - POSTGRES_PASSWORD=airflow
+      - POSTGRES_DB=airflow
+    volumes:
+      - postgres-db-volume:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "airflow"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  airflow-init:
+    <<: *airflow-common
+    container_name: airflow_init
+    entrypoint: /bin/bash
+    command:
+      - -c
+      - |
+        airflow db init && \
+        airflow users create \
+          --username admin \
+          --password admin \
+          --firstname Anonymous \
+          --lastname User \
+          --role Admin \
+          --email admin@example.org
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  airflow-webserver:
+    <<: *airflow-common
+    container_name: airflow_webserver
+    command: webserver
+    ports:
+      - "8080:8080" # Exposing for direct access test, can be removed in production
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    depends_on:
+      airflow-init:
+        condition: service_succeeded
+
+  airflow-scheduler:
+    <<: *airflow-common
+    container_name: airflow_scheduler
+    command: scheduler
+    healthcheck:
+      test: ["CMD-SHELL", "airflow jobs check --job-type SchedulerJob --hostname \"$$HOSTNAME\""]
+      interval: 30s
+      timeout: 30s
+      retries: 5
+    depends_on:
+      airflow-init:
+        condition: service_succeeded
+
+volumes:
+  postgres-db-volume:
+  airflow-logs:
+  airflow-plugins:
