@@ -5,13 +5,16 @@ set -e
 
 echo "--- Running Environment Tests ---"
 
-# 1. Check if the Jumper service is accessible
-echo -n "--> Checking if Jumper service is running on http://localhost:6901..."
-if curl -s --fail http://localhost:6901 > /dev/null; then
+# 1. Check if the Jumper service is accessible and requires authentication
+echo -n "--> Checking if Jumper service is running and secured on https://localhost:6901..."
+# We expect a 401 Unauthorized response, which proves the service is up and enforcing security.
+STATUS_CODE=$(curl -s -o /dev/null -w "%{http_code}" --insecure https://localhost:6901)
+if [ "$STATUS_CODE" -eq 401 ]; then
     echo " [SUCCESS]"
 else
     echo " [FAILURE]"
-    echo "    Error: Jumper service is not accessible on port 6901."
+    echo "    Error: Did not get a 401 Unauthorized status code. Instead, got $STATUS_CODE."
+    echo "    This means the service is either down or not enforcing authentication as expected."
     exit 1
 fi
 
@@ -30,7 +33,8 @@ echo "--- Automated Checks Passed! ---"
 echo ""
 echo "--- Manual Verification Steps ---"
 echo "Please perform the following checks to ensure security restrictions are in place:"
-echo "1. Access the Jumper URL: http://localhost:6901"
+echo "1. Access the Jumper URL: https://localhost:6901 (Note: use https)"
+echo "   Your browser will show a warning about a self-signed certificate. Please accept it to proceed."
 echo "2. Enter the VNC password: password"
 echo "3. The Airflow UI should load automatically."
 echo "4. [Clipboard Test] Try to copy text from your local machine and paste it into the search bar in the Airflow UI. It should fail."
