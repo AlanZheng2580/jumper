@@ -1,15 +1,4 @@
-version: '3.8'
-
-x-airflow-common: &airflow-common
-  image: apache/airflow:2.8.1
-  env_file:
-    - .env
-  volumes:
-    - ./dags:/opt/airflow/dags
-    - airflow-logs:/opt/airflow/logs
-    - airflow-plugins:/opt/airflow/plugins
-  depends_on:
-    - postgres
+version: '3.3'
 
 services:
   jumper:
@@ -37,8 +26,7 @@ services:
       # Disable webcam access
       - KASM_WEBCAM_DISABLED=true
     depends_on:
-      airflow-webserver:
-        condition: service_healthy
+      - airflow-webserver
 
   postgres:
     image: postgres:13
@@ -56,7 +44,13 @@ services:
       retries: 5
 
   airflow-init:
-    <<: *airflow-common
+    image: apache/airflow:2.8.1
+    env_file:
+      - .env
+    volumes:
+      - ./dags:/opt/airflow/dags
+      - airflow-logs:/opt/airflow/logs
+      - airflow-plugins:/opt/airflow/plugins
     container_name: airflow_init
     entrypoint: /bin/bash
     command:
@@ -71,11 +65,16 @@ services:
           --role Admin \
           --email admin@example.org
     depends_on:
-      postgres:
-        condition: service_healthy
+      - postgres
 
   airflow-webserver:
-    <<: *airflow-common
+    image: apache/airflow:2.8.1
+    env_file:
+      - .env
+    volumes:
+      - ./dags:/opt/airflow/dags
+      - airflow-logs:/opt/airflow/logs
+      - airflow-plugins:/opt/airflow/plugins
     container_name: airflow_webserver
     command: webserver
     ports:
@@ -86,21 +85,27 @@ services:
       timeout: 10s
       retries: 5
     depends_on:
-      airflow-init:
-        condition: service_succeeded
+      - postgres
+      - airflow-init
 
   airflow-scheduler:
-    <<: *airflow-common
+    image: apache/airflow:2.8.1
+    env_file:
+      - .env
+    volumes:
+      - ./dags:/opt/airflow/dags
+      - airflow-logs:/opt/airflow/logs
+      - airflow-plugins:/opt/airflow/plugins
     container_name: airflow_scheduler
     command: scheduler
     healthcheck:
-      test: ["CMD-SHELL", "airflow jobs check --job-type SchedulerJob --hostname \"$$HOSTNAME\""]
+      test: ["CMD-SHELL", "airflow jobs check --job-type SchedulerJob --hostname \"$HOSTNAME\""]
       interval: 30s
       timeout: 30s
       retries: 5
     depends_on:
-      airflow-init:
-        condition: service_succeeded
+      - postgres
+      - airflow-init
 
 volumes:
   postgres-db-volume:
