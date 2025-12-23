@@ -13,18 +13,18 @@ services:
       # The URL to launch automatically
       - LAUNCH_URL=http://airflow-webserver:8080/
       # --- Security Hardening ---
-      # Disable clipboard sharing
-      - KASM_VNC_OPTIONS=-noremoteclipboard
-      # Disable file uploads
-      - KASM_FILE_UPLOADS_DISABLED=true
-      # Disable file downloads
-      - KASM_FILE_DOWNLOADS_DISABLED=true
-      # Disable printing
-      - KASM_PRINTING_DISABLED=true
-      # Disable microphone access
-      - KASM_MICROPHONE_DISABLED=true
-      # Disable webcam access
-      - KASM_WEBCAM_DISABLED=true
+      # # Disable clipboard sharing
+      # - KASM_VNC_OPTIONS=-noremoteclipboard
+      # # Disable file uploads
+      # - KASM_FILE_UPLOADS_DISABLED=true
+      # # Disable file downloads
+      # - KASM_FILE_DOWNLOADS_DISABLED=true
+      # # Disable printing
+      # - KASM_PRINTING_DISABLED=true
+      # # Disable microphone access
+      # - KASM_MICROPHONE_DISABLED=true
+      # # Disable webcam access
+      # - KASM_WEBCAM_DISABLED=true
     depends_on:
       - airflow-webserver
 
