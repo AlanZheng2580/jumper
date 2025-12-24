@@ -47,7 +47,7 @@ The first time you run this, it will download the necessary Docker images, which
 ### 2. Access the Secure Jumper
 
 - Open your web browser and navigate to: **http://localhost:6901**
-- You will be prompted for a password. The default password is: `password`
+- You will be prompted for a password. The default user/password is: `kasm_user` / `password`
 
 Upon successful login, the Airflow web UI will automatically load inside the secure browser session.
 
