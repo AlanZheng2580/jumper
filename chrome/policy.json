@@ -1,7 +1,7 @@
 {
-  "URLBlocklist": ["*"],
-  "URLWhitelist": [
-    "https://example.com/*"
+  "URLAllowlist": [
+    "http://airflow-webserver:8080/",
+    "chrome://policy/"
   ],
   "DownloadRestrictions": 3,
   "DefaultFileSystemWriteAllowed": false,

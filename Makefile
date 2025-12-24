@@ -15,6 +15,10 @@ down:
 	@echo "Stopping VNC Jumper and Airflow services..."
 	@docker-compose down
 
+restart:
+	@echo "Restarting VNC Jumper..."
+	@docker-compose restart jumper
+
 # Follow logs of all services
 logs:
 	@echo "Following logs..."
