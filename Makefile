@@ -28,3 +28,6 @@ test: ## Run a simple test to check if services are up.
 clean: ## Stop all services and remove data volumes.
 	@echo "Stopping services and removing all volumes..."
 	@docker-compose down -v --remove-orphans
+
+bash: ## Run bash on jummper
+	docker-compose exec jumper bash
