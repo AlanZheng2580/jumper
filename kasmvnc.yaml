@@ -5,9 +5,16 @@ network:
     pem_key: ${HOME}/.vnc/self.pem
   udp:
     public_ip: 127.0.0.1
+user_session:
+  session_type: exclusive
+  new_session_disconnects_existing_exclusive_session: true
+  concurrent_connections_prompt: false
+  concurrent_connections_prompt_timeout: 10
+  idle_timeout: 600
 runtime_configuration:
   allow_client_to_override_kasm_server_settings: false
-  allow_override_standard_vnc_server_settings: falsedata_loss_prevention:
+  allow_override_standard_vnc_server_settings: false
+data_loss_prevention:
   clipboard:
     delay_between_operations: none
     allow_mimetypes: 
