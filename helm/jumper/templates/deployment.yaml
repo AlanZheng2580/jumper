@@ -1,0 +1,87 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "jumper.fullname" . }}
+  labels:
+    {{- include "jumper.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "jumper.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "jumper.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "jumper.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: {{ .Chart.Name }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.service.port }}
+              protocol: TCP
+          {{- if .Values.vncAuth.enabled }}
+          env:
+            - name: VNC_USER
+              valueFrom:
+                secretKeyRef:
+                  name: {{ if .Values.vncAuth.createSecret }}{{ include "jumper.fullname" . }}-vnc-auth{{ else }}{{ .Values.vncAuth.existingSecret }}{{ end }}
+                  key: username
+            - name: VNC_PW
+              valueFrom:
+                secretKeyRef:
+                  name: {{ if .Values.vncAuth.createSecret }}{{ include "jumper.fullname" . }}-vnc-auth{{ else }}{{ .Values.vncAuth.existingSecret }}{{ end }}
+                  key: password
+          {{- end }}
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          volumeMounts:
+            - name: shm
+              mountPath: /dev/shm
+            - name: config-volume
+              mountPath: /etc/opt/chrome/policies/managed/policy.json
+              subPath: policy.json
+              readOnly: true
+            - name: config-volume
+              mountPath: /etc/opt/chrome/policies/managed/urlblocklist.json
+              subPath: urlblocklist.json
+              readOnly: true
+            - name: config-volume
+              mountPath: /etc/kasmvnc/kasmvnc.yaml
+              subPath: kasmvnc.yaml
+              readOnly: true
+      volumes:
+        - name: shm
+          emptyDir:
+            medium: Memory
+            sizeLimit: {{ .Values.shmSize }}
+        - name: config-volume
+          configMap:
+            name: {{ include "jumper.fullname" . }}-config
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

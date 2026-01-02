@@ -1,0 +1,83 @@
+# Default values for jumper-chart.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+replicaCount: 1
+
+image:
+  repository: kasmweb/chrome
+  pullPolicy: IfNotPresent
+  # Overrides the image tag whose default is the chart's appVersion.
+  tag: "1.18.0"
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  create: true
+  annotations: {}
+  name: ""
+
+podAnnotations: {}
+podSecurityContext: {}
+securityContext: {}
+
+service:
+  type: ClusterIP
+  port: 6901
+
+ingress:
+  enabled: false
+  className: ""
+  annotations: {}
+  hosts:
+    - host: jumper.local
+      paths:
+        - path: /
+          pathType: ImplementationSpecific
+  tls:
+    enabled: true
+    secretName: jumper-tls-secret
+
+# -- VNC Authentication settings
+# @param vncAuth.enabled Enable VNC authentication
+# @param vncAuth.createSecret Automatically create a secret for the password. If false, you must provide an existingSecret.
+# @param vncAuth.username The VNC username
+# @param vncAuth.password The VNC password (only used if createSecret is true). **It's recommended to use --set instead of saving plaintext passwords here.**
+# @param vncAuth.existingSecret The name of an existing secret that contains 'username' and 'password' keys.
+vncAuth:
+  enabled: true
+  createSecret: true
+  username: "kasm_user"
+  password: "" # <- IMPORTANT: Set this via --set or in a values file for production.
+  existingSecret: ""
+
+resources: {}
+  # limits:
+  #   cpu: 500m
+  #   memory: 1Gi
+  # requests:
+  #   cpu: 250m
+  #   memory: 512Mi
+
+shmSize: "512m"
+
+configFiles:
+  policy.json: |
+    {}
+  urlblocklist.json: |
+    {}
+  kasmvnc.yaml: |
+    logging:
+      log_writer_name: stdout
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 100
+  targetCPUUtilizationPercentage: 80
+
+nodeSelector: {}
+tolerations: []
+affinity: {}
