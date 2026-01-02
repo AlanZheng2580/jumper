@@ -1,0 +1,28 @@
+# Refers to https://kasmweb.com/kasmvnc/docs/latest/configuration.html for details
+network:
+  ssl:
+    pem_certificate: ${HOME}/.vnc/self.pem
+    pem_key: ${HOME}/.vnc/self.pem
+  udp:
+    public_ip: 127.0.0.1runtime_configuration:
+  allow_client_to_override_kasm_server_settings: false
+  allow_override_standard_vnc_server_settings: falsedata_loss_prevention:
+  clipboard:
+    delay_between_operations: none
+    allow_mimetypes: 
+      - "text/html"
+    server_to_client:
+      enabled: true
+      size: 0
+      primary_clipboard_enabled: false
+    client_to_server:
+      enabled: false
+      size: 1
+  # watermark:
+  #   repeat_spacing: 200
+  #   tint: 255,255,255,26
+  #   text:
+  #     template: "${KASM_USER} ${KASM_ID} %F %H:%M"
+  #     font: auto
+  #     font_size: 20
+  #     timezone_name: Asia/Taipei 
