@@ -1,43 +1,30 @@
 # Makefile for managing the VNC Jumper environment
 
-.PHONY: all up down logs test clean
+.PHONY: help
+help:  ## Show all availble commands
+	@grep -h -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | \
+	awk 'BEGIN {FS = ":.*?## "}; {printf "🛠  \033[36m%-22s\033[0m %s\n", $$1, $$2}'
 
-# Default command
-all: up
-
-# Bring up the services in detached mode
-up:
+up: ## Start all services in the background.
 	@echo "Starting VNC Jumper and Airflow services..."
 	@docker-compose up -d
 
-# Bring down the services
-down:
+down: ## Stop all services.
 	@echo "Stopping VNC Jumper and Airflow services..."
 	@docker-compose down
 
-restart:
+restart: ## Restart the jumper service.
 	@echo "Restarting VNC Jumper..."
 	@docker-compose restart jumper
 
-# Follow logs of all services
-logs:
+logs: ## View logs from all services.
 	@echo "Following logs..."
 	@docker-compose logs -f
 
-# Run the test script
-test:
+test: ## Run a simple test to check if services are up.
 	@echo "Running tests..."
 	@./test.sh
 
-# Stop services and remove all volumes
-clean:
+clean: ## Stop all services and remove data volumes.
 	@echo "Stopping services and removing all volumes..."
 	@docker-compose down -v --remove-orphans
-
-help:
-	@echo "Available commands:"
-	@echo "  make up     - Start all services in the background."
-	@echo "  make down   - Stop all services."
-	@echo "  make logs   - View logs from all services."
-	@echo "  make test   - Run a simple test to check if services are up."
-	@echo "  make clean  - Stop all services and remove data volumes."
