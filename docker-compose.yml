@@ -12,7 +12,7 @@ services:
     volumes:
       - ./chrome/policy.json:/etc/opt/chrome/policies/managed/policy.json:ro
       - ./chrome/urlblocklist.json:/etc/opt/chrome/policies/managed/urlblocklist.json:ro
-      - ./kasmvnc.yaml:/etc/kasmvnc/kasmvnc.yam:ro
+      - ./kasmvnc.yaml:/etc/kasmvnc/kasmvnc.yaml:ro
     depends_on:
       - airflow-webserver
 
