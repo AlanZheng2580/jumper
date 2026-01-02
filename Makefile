@@ -19,7 +19,7 @@ restart: ## Restart the jumper service.
 
 logs: ## View logs from all services.
 	@echo "Following logs..."
-	@docker-compose logs -f
+	@docker-compose logs -f --tail 100
 
 test: ## Run a simple test to check if services are up.
 	@echo "Running tests..."
